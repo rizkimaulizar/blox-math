@@ -41,31 +41,46 @@
         const SOUND_PATHS = {
             combo: 'assets/sounds/combo.mp3',
             brainLevelUp: 'assets/sounds/brain-level-up.mp3',
-            correct: 'assets/sounds/correct.mp3',
-            clickMenu: '/assets/sounds/click-menu.mp3' // File baru ditambahkan
+            correct: '/assets/sounds/correct-true.mp3',     // UPDATE: Jawaban Benar
+            wrong: '/assets/sounds/correct-wrong.mp3',      // UPDATE: Jawaban Salah
+            numeric: '/assets/sounds/numeric.mp3',          // UPDATE: Keypad Numeric
+            clickMenu: '/assets/sounds/click-menu.mp3'
         };
 
         const audioFiles = {
             combo: new Audio(SOUND_PATHS.combo),
             brainLevelUp: new Audio(SOUND_PATHS.brainLevelUp),
             correct: new Audio(SOUND_PATHS.correct),
-            clickMenu: new Audio(SOUND_PATHS.clickMenu) // Audio object baru
+            wrong: new Audio(SOUND_PATHS.wrong),     // Object Audio Baru
+            numeric: new Audio(SOUND_PATHS.numeric), // Object Audio Baru
+            clickMenu: new Audio(SOUND_PATHS.clickMenu)
         };
 
         const playSFX = (type) => {
-            // Logika untuk suara Menu (MP3)
+            // Priority 1: Suara Menu, Numeric, & Wrong (MP3 Only - Return agar tidak bunyi beep komputer)
             if (type === 'click-menu') { 
                 audioFiles.clickMenu.currentTime = 0; 
                 audioFiles.clickMenu.play().catch(() => {});
-                return; // Keluar agar tidak memutar suara beep komputer
+                return;
+            }
+            if (type === 'numeric') { 
+                audioFiles.numeric.currentTime = 0; 
+                audioFiles.numeric.play().catch(() => {});
+                return;
+            }
+            if (type === 'wrong') { 
+                audioFiles.wrong.currentTime = 0; 
+                audioFiles.wrong.play().catch(() => {});
+                return;
             }
 
-            // Coba putar file MP3 jika ada
+            // Priority 2: Efek Game Lainnya (MP3)
             if (type === 'combo') { audioFiles.combo.currentTime = 0; audioFiles.combo.play().catch(() => {}); }
             if (type === 'levelup') { audioFiles.brainLevelUp.currentTime = 0; audioFiles.brainLevelUp.play().catch(() => {}); }
             if (type === 'correct') { audioFiles.correct.currentTime = 0; audioFiles.correct.play().catch(() => {}); }
 
-            // Fallback: Suara "Beep" Buatan Komputer (Untuk Gameplay/Kuis)
+            // Priority 3: Fallback Oscillator (Beep Komputer)
+            // Hanya dijalankan untuk tipe 'click' (tombol delete/umum) atau 'finish'
             if (typeof window === 'undefined') return;
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
@@ -80,8 +95,6 @@
 
             if (type === 'click') {
                 osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(300, now + 0.1); gain.gain.setValueAtTime(0.05, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1);
-            } else if (type === 'wrong') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.3); gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.3); osc.start(now); osc.stop(now + 0.3);
             } else if (type === 'finish') {
                 const notes = [523.25, 659.25, 783.99, 1046.50]; const duration = 0.12; osc.disconnect(); notes.forEach((freq, i) => { const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.type = 'triangle'; o.frequency.value = freq; const time = now + (i * duration); g.gain.setValueAtTime(0.1, time); g.gain.linearRampToValueAtTime(0.01, time + duration); o.start(time); o.stop(time + duration); });
             }
@@ -308,8 +321,8 @@
                 setRingOutRot(Math.floor(Math.random() * 10)); 
                 setPoppedBalloons([]); 
             };
-            // NOTE: handleAnswer dan deleteAnswer tetap menggunakan 'click' (default beep) karena ini saat kuis berjalan
-            const handleAnswer = (val) => { playSFX('click'); if (feedback) return; setUserAnswer(prev => { if (prev.length > 3) return prev; return prev + val; }); };
+            // NOTE: Tombol angka (0-9) sekarang menggunakan suara 'numeric'. 
+            const handleAnswer = (val) => { playSFX('numeric'); if (feedback) return; setUserAnswer(prev => { if (prev.length > 3) return prev; return prev + val; }); };
             const deleteAnswer = () => { playSFX('click'); if (feedback) return; setUserAnswer(prev => prev.slice(0, -1)); };
 
             const rotateRing = (ring, dir) => {
