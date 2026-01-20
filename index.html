@@ -36,27 +36,36 @@
         import { Star, RefreshCcw, Play, Lock, Plus, Minus, X, Divide, ChevronLeft, ChevronRight, Trophy, Crown, Skull, Volume2, Box, Shield, Zap, Sword, Hexagon, Medal, Terminal, Code, Circle, Gem, Ghost, Smile, Settings, Target, Disc, RotateCcw, RotateCw, Flame, Brain } from 'lucide-react';
 
         // ==========================================
-        // BAGIAN 1: LOGIKA AUDIO (Ditempel Langsung)
+        // BAGIAN 1: LOGIKA AUDIO (Diperbarui)
         // ==========================================
         const SOUND_PATHS = {
             combo: 'assets/sounds/combo.mp3',
             brainLevelUp: 'assets/sounds/brain-level-up.mp3',
-            correct: 'assets/sounds/correct.mp3'
+            correct: 'assets/sounds/correct.mp3',
+            clickMenu: '/assets/sounds/click-menu.mp3' // File baru ditambahkan
         };
 
         const audioFiles = {
             combo: new Audio(SOUND_PATHS.combo),
             brainLevelUp: new Audio(SOUND_PATHS.brainLevelUp),
-            correct: new Audio(SOUND_PATHS.correct)
+            correct: new Audio(SOUND_PATHS.correct),
+            clickMenu: new Audio(SOUND_PATHS.clickMenu) // Audio object baru
         };
 
         const playSFX = (type) => {
+            // Logika untuk suara Menu (MP3)
+            if (type === 'click-menu') { 
+                audioFiles.clickMenu.currentTime = 0; 
+                audioFiles.clickMenu.play().catch(() => {});
+                return; // Keluar agar tidak memutar suara beep komputer
+            }
+
             // Coba putar file MP3 jika ada
             if (type === 'combo') { audioFiles.combo.currentTime = 0; audioFiles.combo.play().catch(() => {}); }
             if (type === 'levelup') { audioFiles.brainLevelUp.currentTime = 0; audioFiles.brainLevelUp.play().catch(() => {}); }
             if (type === 'correct') { audioFiles.correct.currentTime = 0; audioFiles.correct.play().catch(() => {}); }
 
-            // Fallback: Suara "Beep" Buatan Komputer (Agar tetap ada suara jika MP3 gagal)
+            // Fallback: Suara "Beep" Buatan Komputer (Untuk Gameplay/Kuis)
             if (typeof window === 'undefined') return;
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
@@ -103,7 +112,7 @@
             const [timeLeft, setTimeLeft] = useState(7); 
             const [userAnswer, setUserAnswer] = useState('');
             const [feedback, setFeedback] = useState(null);
-            const [ringMidRot, setRingMidRot] = useState(0);   
+            const [ringMidRot, setRingMidRot] = useState(0);    
             const [ringOutRot, setRingOutRot] = useState(0); 
             const [poppedBalloons, setPoppedBalloons] = useState([]); 
             const [combo, setCombo] = useState(0);
@@ -274,16 +283,16 @@
                 return qList;
             };
 
-            const selectDifficulty = (diff) => { playSFX('click'); setDifficulty(diff); if (diff === 'rookie') setAppState('rookie_menu'); if (diff === 'pro') setAppState('pro_menu'); if (diff === 'legend') setAppState('hacker_menu'); };
+            const selectDifficulty = (diff) => { playSFX('click-menu'); setDifficulty(diff); if (diff === 'rookie') setAppState('rookie_menu'); if (diff === 'pro') setAppState('pro_menu'); if (diff === 'legend') setAppState('hacker_menu'); };
             const selectOperation = (op) => { 
-                playSFX('click'); setOperation(op); 
+                playSFX('click-menu'); setOperation(op); 
                 if (op === 'hacker_circle') { setRingMidRot(Math.floor(Math.random() * 10)); setRingOutRot(Math.floor(Math.random() * 10)); }
                 if (op && ['mix_add_sub', 'mix_mul_div', 'mix_all', 'hacker_balloon', 'hacker_algebra', 'hacker_circle'].includes(op)) startIntro(null); 
                 else setAppState('table_select'); 
             };
-            const startIntro = (table) => { playSFX('click'); setSelectedTable(table); setAppState('intro'); };
+            const startIntro = (table) => { playSFX('click-menu'); setSelectedTable(table); setAppState('intro'); };
             const startGame = () => { 
-                playSFX('click'); 
+                playSFX('click-menu'); 
                 const newQuestions = generateQuestions(operation, selectedTable); 
                 setQuestions(newQuestions); 
                 setCurrentQuestionIndex(0); 
@@ -299,6 +308,7 @@
                 setRingOutRot(Math.floor(Math.random() * 10)); 
                 setPoppedBalloons([]); 
             };
+            // NOTE: handleAnswer dan deleteAnswer tetap menggunakan 'click' (default beep) karena ini saat kuis berjalan
             const handleAnswer = (val) => { playSFX('click'); if (feedback) return; setUserAnswer(prev => { if (prev.length > 3) return prev; return prev + val; }); };
             const deleteAnswer = () => { playSFX('click'); if (feedback) return; setUserAnswer(prev => prev.slice(0, -1)); };
 
@@ -430,7 +440,7 @@
                 const isPro = appState === 'pro_menu';
                 return (
                 <div className={`min-h-screen ${isPro ? 'bg-[#2a52be]' : 'bg-[#00b06f]'} flex flex-col items-center justify-center p-4`}>
-                    <div className="w-full max-w-md mb-6 flex items-center z-10 relative"><button onClick={() => { playSFX('click'); setAppState('home'); }} className={`p-3 rounded-md text-white border-b-4 active:border-b-0 active:translate-y-1 transition-all ${isPro ? 'bg-[#1a329e] border-[#102060]' : 'bg-[#008c5a] border-[#006e46]'}`}><ChevronLeft size={28} strokeWidth={3} /></button><h2 className="text-3xl font-black text-white ml-4 drop-shadow-md uppercase tracking-tight">MENU {isPro ? 'PRO' : 'NOOB'}</h2></div>
+                    <div className="w-full max-w-md mb-6 flex items-center z-10 relative"><button onClick={() => { playSFX('click-menu'); setAppState('home'); }} className={`p-3 rounded-md text-white border-b-4 active:border-b-0 active:translate-y-1 transition-all ${isPro ? 'bg-[#1a329e] border-[#102060]' : 'bg-[#008c5a] border-[#006e46]'}`}><ChevronLeft size={28} strokeWidth={3} /></button><h2 className="text-3xl font-black text-white ml-4 drop-shadow-md uppercase tracking-tight">MENU {isPro ? 'PRO' : 'NOOB'}</h2></div>
                     <div className={`grid ${isPro ? 'grid-cols-1' : 'grid-cols-2'} gap-4 w-full max-w-md z-10`}>
                         {!isPro ? (['add','sub','mul','div'].map(op => (<button key={op} onClick={() => selectOperation(op)} className="bg-[#393b3d] border-[#232527] border-b-8 hover:brightness-110 active:border-b-0 active:translate-y-2 aspect-square rounded-md flex flex-col items-center justify-center gap-2 group transition-all"><div className={`p-2 rounded group-hover:scale-110 transition-transform ${op==='add'?'text-blue-400':op==='sub'?'text-red-400':op==='mul'?'text-yellow-400':'text-purple-400'}`}>{op==='add'?<Plus size={40} strokeWidth={4}/>:op==='sub'?<Minus size={40} strokeWidth={4}/>:op==='mul'?<X size={40} strokeWidth={4}/>:<Divide size={40} strokeWidth={4}/>}</div><span className="text-xl font-black text-white uppercase">{op==='add'?'TAMBAH':op==='sub'?'KURANG':op==='mul'?'KALI':'BAGI'}</span></button>))) : (<><button onClick={() => selectOperation('mix_add_sub')} className="bg-[#393b3d] text-white p-5 rounded-md border-b-8 border-[#232527] active:translate-y-2 flex items-center justify-between"><div className="flex gap-4"><div className="bg-[#00b0f4] p-3 rounded text-white"><Sword size={32}/></div><div className="text-left"><div className="text-2xl font-black">ADVENTURE</div><div className="text-xs font-bold text-gray-400">+ & -</div></div></div><div className="bg-black/30 px-3 py-1 rounded">20 SOAL</div></button><button onClick={() => selectOperation('mix_mul_div')} className="bg-[#393b3d] text-white p-5 rounded-md border-b-8 border-[#232527] active:translate-y-2 flex items-center justify-between"><div className="flex gap-4"><div className="bg-[#e29e00] p-3 rounded text-white"><Hexagon size={32}/></div><div className="text-left"><div className="text-2xl font-black">DUNGEON</div><div className="text-xs font-bold text-gray-400">x & :</div></div></div><div className="bg-black/30 px-3 py-1 rounded">20 SOAL</div></button><button onClick={() => selectOperation('mix_all')} className="bg-[#393b3d] text-white p-5 rounded-md border-b-8 border-[#232527] active:translate-y-2 flex items-center justify-between"><div className="flex gap-4"><div className="bg-[#f44336] p-3 rounded text-white"><Skull size={32}/></div><div className="text-left"><div className="text-2xl font-black">BOSS RAID</div><div className="text-xs font-bold text-gray-400">SEMUA</div></div></div><div className="bg-black/30 px-3 py-1 rounded">25 SOAL</div></button></>)}
                     </div>
@@ -442,7 +452,7 @@
                 return (
                 <div className="min-h-screen bg-[#0d1117] flex flex-col items-center justify-center p-4 relative overflow-hidden">
                     <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(0deg, transparent 24%, #00ff41 25%, #00ff41 26%, transparent 27%, transparent 74%, #00ff41 75%, #00ff41 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, #00ff41 25%, #00ff41 26%, transparent 27%, transparent 74%, #00ff41 75%, #00ff41 76%, transparent 77%, transparent)', backgroundSize: '50px 50px' }}></div>
-                    <div className="w-full max-w-md mb-6 flex items-center z-10 relative"><button onClick={() => { playSFX('click'); setAppState('home'); }} className="bg-[#161b22] p-3 rounded-md text-[#00ff41] border border-[#00ff41] hover:bg-[#00ff41] hover:text-black transition-all"><ChevronLeft size={28} strokeWidth={3} /></button><h2 className="text-3xl font-black text-[#00ff41] ml-4 drop-shadow-[0_0_10px_#00ff41] uppercase tracking-tight font-mono">TERMINAL</h2></div>
+                    <div className="w-full max-w-md mb-6 flex items-center z-10 relative"><button onClick={() => { playSFX('click-menu'); setAppState('home'); }} className="bg-[#161b22] p-3 rounded-md text-[#00ff41] border border-[#00ff41] hover:bg-[#00ff41] hover:text-black transition-all"><ChevronLeft size={28} strokeWidth={3} /></button><h2 className="text-3xl font-black text-[#00ff41] ml-4 drop-shadow-[0_0_10px_#00ff41] uppercase tracking-tight font-mono">TERMINAL</h2></div>
                     <div className="flex flex-col gap-4 w-full max-w-md z-10">
                         <button onClick={() => selectOperation('hacker_balloon')} className="group relative bg-[#161b22] hover:bg-[#00ff41]/10 text-white p-5 rounded-md border border-[#00ff41] active:translate-y-1 transition-all flex items-center justify-between shadow-[0_0_15px_rgba(0,255,65,0.1)]"><div className="flex items-center gap-4"><div className="bg-[#00ff41]/20 p-3 rounded-full border border-[#00ff41] animate-pulse"><Circle size={32} className="text-[#00ff41]" /></div><div className="text-left"><div className="text-2xl font-black uppercase text-[#00ff41] font-mono">BALON HACKER</div><div className="text-[#00ff41]/70 text-xs font-bold uppercase font-mono">ISI KOSONG • 10 DETIK</div></div></div></button>
                         <button onClick={() => selectOperation('hacker_algebra')} className="group relative bg-[#161b22] hover:bg-[#00ff41]/10 text-white p-5 rounded-md border border-[#00ff41] active:translate-y-1 transition-all flex items-center justify-between shadow-[0_0_15px_rgba(0,255,65,0.1)]"><div className="flex items-center gap-4"><div className="bg-[#00ff41]/20 p-3 rounded-full border border-[#00ff41] animate-pulse"><Code size={32} className="text-[#00ff41]" /></div><div className="text-left"><div className="text-2xl font-black uppercase text-[#00ff41] font-mono">CODE BREAKER</div><div className="text-[#00ff41]/70 text-xs font-bold uppercase font-mono">PEMECAH SANDI • 9 DETIK</div></div></div></button>
@@ -456,7 +466,7 @@
                 return (
                 <div className="min-h-screen bg-[#e29e00] flex flex-col items-center justify-center p-4">
                     <div className="bg-[#232527] p-6 rounded-md shadow-xl max-w-md w-full text-center border-b-8 border-black z-10">
-                    <div className="flex justify-between items-center mb-6"><button onClick={() => { playSFX('click'); setAppState('rookie_menu'); }} className="text-gray-400 hover:text-white font-black">{'< KEMBALI'}</button><h2 className="text-2xl font-black text-white uppercase">Pilih Angka</h2></div>
+                    <div className="flex justify-between items-center mb-6"><button onClick={() => { playSFX('click-menu'); setAppState('rookie_menu'); }} className="text-gray-400 hover:text-white font-black">{'< KEMBALI'}</button><h2 className="text-2xl font-black text-white uppercase">Pilih Angka</h2></div>
                     <div className="grid grid-cols-2 gap-3">{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (<button key={num} onClick={() => startIntro(num)} className="bg-[#00b0f4] hover:bg-[#34c3ff] active:translate-y-1 active:border-b-0 text-white text-2xl font-black py-3 rounded-md border-b-4 border-[#0077a6] transition-all">LEVEL {num}</button>))}</div>
                     </div>
                 </div>
@@ -486,7 +496,7 @@
                         <p className={`font-bold ${isHacker ? 'text-[#00ff41]' : 'text-gray-300'}`}>MISI:</p><p className="text-white text-lg">{operation === 'hacker_balloon' ? 'Isi Balon Kosong' : operation === 'hacker_algebra' ? 'Pecahkan Kode' : operation === 'hacker_circle' ? 'Putar Roda Gigi' : `Jawab ${totalQuestions} Soal`}</p><div className="h-px bg-gray-600 my-2"></div><p className={`font-bold ${isHacker ? 'text-[#00ff41]' : 'text-gray-300'}`}>TIMER:</p><p className={`${isHacker ? 'text-[#00ff41] font-mono' : 'text-[#f44336]'} font-black text-xl`}>{maxTime} Detik</p>
                     </div>
                     <button onClick={startGame} className={`w-full text-3xl font-black py-4 rounded-md active:translate-y-2 transition-all flex items-center justify-center gap-2 uppercase ${isHacker ? 'bg-[#00ff41] text-black hover:bg-[#00ff41]/80 shadow-[0_0_15px_#00ff41]' : 'bg-[#00b06f] hover:bg-[#00c07f] text-white border-b-8 border-[#008c5a] active:border-b-0'}`}>GAS KAN!</button>
-                    <button onClick={() => { playSFX('click'); if (difficulty === 'legend') setAppState('hacker_menu'); else if (difficulty === 'pro') setAppState('pro_menu'); else if (selectedTable) setAppState('table_select'); else setAppState('rookie_menu'); }} className="mt-6 text-gray-400 font-bold hover:text-white uppercase text-sm">Batal Misi</button>
+                    <button onClick={() => { playSFX('click-menu'); if (difficulty === 'legend') setAppState('hacker_menu'); else if (difficulty === 'pro') setAppState('pro_menu'); else if (selectedTable) setAppState('table_select'); else setAppState('rookie_menu'); }} className="mt-6 text-gray-400 font-bold hover:text-white uppercase text-sm">Batal Misi</button>
                     </div>
                 </div>
                 );
@@ -624,10 +634,10 @@
                     <div className={`rounded-md p-4 mb-6 border ${isHacker ? 'bg-black border-[#00ff41] text-[#00ff41]' : 'bg-[#1a1c1e] border-[#393b3d] text-white'}`}><p className="font-bold uppercase text-xs mb-1 tracking-widest opacity-70">FINAL SCORE</p><div className="text-6xl font-black">{score} <span className="text-2xl opacity-50">/ {maxScore}</span></div></div>
                     <p className={`font-bold text-lg mb-8 italic leading-relaxed border-l-4 pl-4 text-left py-2 ${isHacker ? 'text-[#00ff41] border-[#00ff41] bg-[#00ff41]/10 font-mono' : 'text-gray-300 border-[#00b0f4] bg-[#00000030]'}`}>"{message}"</p>
                     <div className="flex gap-3">
-                        <button onClick={() => { playSFX('click'); setAppState(difficulty === 'legend' ? 'hacker_menu' : (difficulty === 'pro' ? 'pro_menu' : 'rookie_menu')); }} className="flex-1 bg-[#393b3d] hover:bg-[#4b4d4f] text-white font-black py-4 rounded-md border-b-4 border-[#1a1c1e] active:border-b-0 active:translate-y-1 transition-all uppercase">GANTI MISI</button>
-                        <button onClick={() => { playSFX('click'); if (selectedTable !== null) startIntro(selectedTable); else startIntro(null); }} className={`flex-1 text-white font-black py-4 rounded-md border-b-4 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 uppercase ${isHacker ? 'bg-[#00ff41] text-black border-[#00ce35] hover:bg-[#00ff41]/90' : 'bg-[#00b0f4] hover:bg-[#34c3ff] border-[#0077a6]'}`}><RefreshCcw size={20} /> Re-Spawn</button>
+                        <button onClick={() => { playSFX('click-menu'); setAppState(difficulty === 'legend' ? 'hacker_menu' : (difficulty === 'pro' ? 'pro_menu' : 'rookie_menu')); }} className="flex-1 bg-[#393b3d] hover:bg-[#4b4d4f] text-white font-black py-4 rounded-md border-b-4 border-[#1a1c1e] active:border-b-0 active:translate-y-1 transition-all uppercase">GANTI MISI</button>
+                        <button onClick={() => { playSFX('click-menu'); if (selectedTable !== null) startIntro(selectedTable); else startIntro(null); }} className={`flex-1 text-white font-black py-4 rounded-md border-b-4 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 uppercase ${isHacker ? 'bg-[#00ff41] text-black border-[#00ce35] hover:bg-[#00ff41]/90' : 'bg-[#00b0f4] hover:bg-[#34c3ff] border-[#0077a6]'}`}><RefreshCcw size={20} /> Re-Spawn</button>
                     </div>
-                    <div className="mt-4 flex justify-center"><button onClick={() => { playSFX('click'); playVoiceOver(message); }} className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${isHacker ? 'text-[#00ff41]' : 'text-[#00b0f4] hover:text-white'}`}><Volume2 size={14}/> Replay Voice</button></div>
+                    <div className="mt-4 flex justify-center"><button onClick={() => { playSFX('click-menu'); playVoiceOver(message); }} className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${isHacker ? 'text-[#00ff41]' : 'text-[#00b0f4] hover:text-white'}`}><Volume2 size={14}/> Replay Voice</button></div>
                     </div>
                 </div>
                 );
