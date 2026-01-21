@@ -47,6 +47,14 @@
             clickMenu: '/assets/sounds/click-menu.mp3'
         };
 
+        // MAPPING SUARA VOICE OVER (Permintaan Baru)
+        const VOICE_PATHS = {
+            "Wah, otakmu pasti sebesar Galaksi! Kalkulator aja minder lihat kamu.": 'assets/sounds/Wah-otakmu-pasti-sebesar-Galaksi!.mp3',
+            "Dikit lagi jadi Jenius! Teman-temanmu pasti gemetar kalau lihat nilaimu.": 'assets/sounds/Dikit-lagi-jadi-Jenius!.mp3',
+            "Tapi masa cuma segini? Ayam tetangga sebelah aja bisa lebih jago lho! Ayo fokus!": 'assets/sounds/Tapi-masa-cuma-segini.mp3',
+            "Otakmu masih tidur ya? Ayo bangunkan naga di dalam dirimu, jangan mau kalah sama kasur!": 'assets/sounds/Otakmu-masih-tidur-ya.mp3'
+        };
+
         const audioFiles = {
             combo: new Audio(SOUND_PATHS.combo),
             brainLevelUp: new Audio(SOUND_PATHS.brainLevelUp),
@@ -97,6 +105,14 @@
         };
 
         const playVoiceOver = (text) => {
+            // 1. Cek apakah ada file MP3 untuk teks ini (Priority)
+            if (VOICE_PATHS[text]) {
+                const audio = new Audio(VOICE_PATHS[text]);
+                audio.play().catch((e) => console.log("Gagal memutar audio voice:", e));
+                return;
+            }
+
+            // 2. Fallback ke Text-to-Speech Browser (Untuk mode Hacker/Pro atau jika file tidak ada)
             if (typeof window !== 'undefined' && window.speechSynthesis) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
@@ -128,9 +144,7 @@
             const [comboMsg, setComboMsg] = useState('');
             const [showBrainLevelUp, setShowBrainLevelUp] = useState(false);
 
-            // LOGIKA WAKTU: Default 7 detik untuk semua soal standar
             let maxTime = 7;
-            // if (difficulty === 'pro') maxTime = 5; // DIHAPUS agar tetap 7 detik
             if (operation === 'hacker_algebra') maxTime = 9; 
             if (operation === 'hacker_circle') maxTime = 13; 
             if (operation === 'hacker_balloon') maxTime = 10; 
@@ -194,8 +208,6 @@
 
                         let n1 = 0, n2 = 0, ans = 0;
 
-                        // --- LOGIKA BARU UNTUK DUNGEON & BOSS RAID (DIUPDATE) ---
-                        
                         if (currentOp === 'add') {
                             if (stage === 'easy') { n1 = getRandom(2, 20); n2 = getRandom(2, 20); }
                             else if (stage === 'medium') { n1 = getRandom(20, 50); n2 = getRandom(10, 50); }
@@ -206,42 +218,27 @@
                             if (stage === 'easy') { n1 = getRandom(5, 20); n2 = getRandom(2, 10); }
                             else if (stage === 'medium') { n1 = getRandom(20, 60); n2 = getRandom(5, 30); }
                             else { n1 = getRandom(50, 100); n2 = getRandom(10, 50); } // Hard
-                            
-                            // Mencegah hasil minus
                             if (n1 < n2) [n1, n2] = [n2, n1];
                             ans = n1 - n2;
                         }
                         else if (currentOp === 'mul') {
                             if (stage === 'easy') { n1 = getRandom(2, 9); n2 = getRandom(2, 9); }
                             else if (stage === 'medium') { n1 = getRandom(10, 15); n2 = getRandom(2, 9); }
-                            else {
-                                // Hard: 2 digit x 1 digit (atau sebaliknya).
-                                // Syarat: Angka max 20 ke bawah.
-                                n1 = getRandom(10, 20); // 2 Digit, maks 20
-                                n2 = getRandom(2, 9);   // 1 Digit
-                            }
-                            if (Math.random() > 0.5) [n1, n2] = [n2, n1]; // Acak posisi
+                            else { n1 = getRandom(10, 20); n2 = getRandom(2, 9); }
+                            if (Math.random() > 0.5) [n1, n2] = [n2, n1]; 
                             ans = n1 * n2;
                         }
                         else if (currentOp === 'div') {
-                            // Mencegah desimal dengan cara: n1 = n2 * ans
                             let qVal = 0; 
                             if (stage === 'easy') { qVal = getRandom(2, 9); n2 = getRandom(2, 5); }
                             else if (stage === 'medium') { qVal = getRandom(2, 12); n2 = getRandom(3, 9); }
-                            else {
-                                // Hard: Menggunakan logika invers perkalian hard.
-                                // Quotient (Jawaban) 2 digit (10-20), Pembagi 1 digit (2-9)
-                                // Sehingga n1 (Dividend) adalah hasil kali mereka.
-                                qVal = getRandom(10, 20);
-                                n2 = getRandom(2, 9);
-                            }
+                            else { qVal = getRandom(10, 20); n2 = getRandom(2, 9); }
                             n1 = n2 * qVal; 
                             ans = qVal;
                         }
 
-                        // Validasi Tambahan: Mencegah 0 atau minus (jika ada yg lolos)
                         if (ans <= 0) continue; 
-                        if (currentOp === 'div' && n1 === n2) continue; // Mencegah jawaban 1 terus
+                        if (currentOp === 'div' && n1 === n2) continue; 
 
                         const sig = `${n1}${currentOp}${n2}`;
                         if (!history.has(sig)) { 
@@ -666,36 +663,6 @@
                             </div>
                             </>
                         )}
-                    </div>
-                </div>
-                );
-            }
-
-            if (appState === 'result') {
-                let title = ""; let emoji = null; let color = "";
-                const maxScore = questions.length;
-                const percentage = (score / maxScore) * 100;
-                const message = getMotivationalMessage(score, maxScore, difficulty);
-                const isHacker = difficulty === 'legend';
-
-                if (percentage === 100) { title = isHacker ? "SYSTEM HACKED!" : "HACKER LEVEL!"; emoji = <Crown size={80} className={`${isHacker ? 'text-[#00ff41]' : 'text-[#e29e00]'} animate-bounce`} />; color = isHacker ? "text-[#00ff41]" : "text-[#e29e00]"; }
-                else if (percentage >= 80) { title = "PRO PLAYER!"; emoji = <Trophy size={80} className="text-[#00b0f4] animate-pulse" />; color = "text-[#00b0f4]"; }
-                else if (percentage >= 50) { title = "NOOB BERBAKAT"; emoji = <Medal size={80} className="text-[#00b06f]" />; color = "text-[#00b06f]"; }
-                else { title = "TOTAL OOF!"; emoji = <Skull size={80} className="text-[#f44336]" />; color = "text-[#f44336]"; }
-                
-                return (
-                <div className={`min-h-screen flex flex-col items-center justify-center p-4 font-sans ${isHacker ? 'bg-[#0d1117]' : 'bg-[#111]'}`}>
-                    <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #333 0, #333 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px' }}></div>
-                    <div className={`p-8 rounded-md shadow-[0_0_50px_rgba(0,0,0,0.5)] max-w-md w-full text-center border-4 z-10 animate-fade-in relative ${isHacker ? 'bg-[#161b22] border-[#00ff41]' : 'bg-[#232527] border-[#393b3d]'}`}>
-                    <div className="flex justify-center mb-6"><div className={`p-4 rounded-full border-4 ${isHacker ? 'bg-black border-[#00ff41]' : 'bg-[#1a1c1e] border-[#393b3d]'}`}>{emoji}</div></div>
-                    <h2 className={`text-4xl font-black ${color} mb-2 uppercase drop-shadow-[0_2px_0_#000] ${isHacker ? 'font-mono' : ''}`}>{title}</h2>
-                    <div className={`rounded-md p-4 mb-6 border ${isHacker ? 'bg-black border-[#00ff41] text-[#00ff41]' : 'bg-[#1a1c1e] border-[#393b3d] text-white'}`}><p className="font-bold uppercase text-xs mb-1 tracking-widest opacity-70">FINAL SCORE</p><div className="text-6xl font-black">{score} <span className="text-2xl opacity-50">/ {maxScore}</span></div></div>
-                    <p className={`font-bold text-lg mb-8 italic leading-relaxed border-l-4 pl-4 text-left py-2 ${isHacker ? 'text-[#00ff41] border-[#00ff41] bg-[#00ff41]/10 font-mono' : 'text-gray-300 border-[#00b0f4] bg-[#00000030]'}`}>"{message}"</p>
-                    <div className="flex gap-3">
-                        <button onClick={() => { playSFX('click-menu'); setAppState(difficulty === 'legend' ? 'hacker_menu' : (difficulty === 'pro' ? 'pro_menu' : 'rookie_menu')); }} className="flex-1 bg-[#393b3d] hover:bg-[#4b4d4f] text-white font-black py-4 rounded-md border-b-4 border-[#1a1c1e] active:border-b-0 active:translate-y-1 transition-all uppercase">GANTI MISI</button>
-                        <button onClick={() => { playSFX('click-menu'); if (selectedTable !== null) startIntro(selectedTable); else startIntro(null); }} className={`flex-1 text-white font-black py-4 rounded-md border-b-4 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 uppercase ${isHacker ? 'bg-[#00ff41] text-black border-[#00ce35] hover:bg-[#00ff41]/90' : 'bg-[#00b0f4] hover:bg-[#34c3ff] border-[#0077a6]'}`}><RefreshCcw size={20} /> Re-Spawn</button>
-                    </div>
-                    <div className="mt-4 flex justify-center"><button onClick={() => { playSFX('click-menu'); playVoiceOver(message); }} className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${isHacker ? 'text-[#00ff41]' : 'text-[#00b0f4] hover:text-white'}`}><Volume2 size={14}/> Replay Voice</button></div>
                     </div>
                 </div>
                 );
