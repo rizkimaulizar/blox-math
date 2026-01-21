@@ -47,10 +47,11 @@
             clickMenu: '/assets/sounds/click-menu.mp3'
         };
 
-        // MAPPING KALIMAT KE FILE SUARA (VOICE OVER)
+        // MAPPING KALIMAT KE FILE SUARA (VOICE OVER) - DIPERBAIKI
         const VOICE_PATHS = {
-            "Wah, otakmu pasti sebesar Galaksi. Kalkulator aja minder lihat kamu.": 'assets/sounds/Wah-otakmu-pasti-sebesar-Galaksi.mp3',
-            "Dikit lagi jadi Jenius. Teman-temanmu pasti gemetar kalau lihat nilaimu.": 'assets/sounds/Dikit-lagi-jadi-Jenius.mp3',
+            // Perhatikan nama file disesuaikan dengan permintaan terakhir (tanpa tanda seru di nama file)
+            "Wah, otakmu pasti sebesar Galaksi! Kalkulator aja minder lihat kamu.": 'assets/sounds/Wah-otakmu-pasti-sebesar-Galaksi.mp3',
+            "Dikit lagi jadi Jenius! Teman-temanmu pasti gemetar kalau lihat nilaimu.": 'assets/sounds/Dikit-lagi-jadi-Jenius.mp3',
             "Tapi masa cuma segini? Ayam tetangga sebelah aja bisa lebih jago lho! Ayo fokus!": 'assets/sounds/Tapi-masa-cuma-segini.mp3',
             "Otakmu masih tidur ya? Ayo bangunkan naga di dalam dirimu, jangan mau kalah sama kasur!": 'assets/sounds/Otakmu-masih-tidur-ya.mp3'
         };
@@ -106,8 +107,11 @@
 
         const playVoiceOver = (text) => {
             // Cek apakah ada file MP3 untuk teks ini (Priority)
-            if (VOICE_PATHS[text]) {
-                const voice = new Audio(VOICE_PATHS[text]);
+            // Trim spasi di awal/akhir text untuk memastikan kecocokan
+            const cleanText = text.trim();
+            
+            if (VOICE_PATHS[cleanText]) {
+                const voice = new Audio(VOICE_PATHS[cleanText]);
                 voice.play().catch((e) => console.log("Gagal memutar audio voice:", e));
                 return;
             }
@@ -115,7 +119,7 @@
             // Fallback ke TTS Browser jika file tidak terdaftar
             if (typeof window !== 'undefined' && window.speechSynthesis) {
                 window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
+                const utterance = new SpeechSynthesisUtterance(cleanText);
                 utterance.lang = 'id-ID';
                 utterance.rate = 1.1;
                 window.speechSynthesis.speak(utterance);
