@@ -36,7 +36,7 @@
         import { Star, RefreshCcw, Play, Lock, Plus, Minus, X, Divide, ChevronLeft, ChevronRight, Trophy, Crown, Skull, Volume2, Box, Shield, Zap, Sword, Hexagon, Medal, Terminal, Code, Circle, Gem, Ghost, Smile, Settings, Target, Disc, RotateCcw, RotateCw, Flame, Brain } from 'lucide-react';
 
         // ==========================================
-        // BAGIAN 1: LOGIKA AUDIO (Diperbarui)
+        // BAGIAN 1: LOGIKA AUDIO
         // ==========================================
         const SOUND_PATHS = {
             combo: 'assets/sounds/combo.mp3',
@@ -57,7 +57,6 @@
         };
 
         const playSFX = (type) => {
-            // Priority 1: Suara Menu, Numeric, & Wrong (MP3 Only - Return agar tidak bunyi beep komputer)
             if (type === 'click-menu') { 
                 audioFiles.clickMenu.currentTime = 0; 
                 audioFiles.clickMenu.play().catch(() => {});
@@ -74,13 +73,10 @@
                 return;
             }
 
-            // Priority 2: Efek Game Lainnya (MP3)
             if (type === 'combo') { audioFiles.combo.currentTime = 0; audioFiles.combo.play().catch(() => {}); }
             if (type === 'levelup') { audioFiles.brainLevelUp.currentTime = 0; audioFiles.brainLevelUp.play().catch(() => {}); }
             if (type === 'correct') { audioFiles.correct.currentTime = 0; audioFiles.correct.play().catch(() => {}); }
 
-            // Priority 3: Fallback Oscillator (Beep Komputer)
-            // Hanya dijalankan untuk tipe 'click' (tombol delete/umum) atau 'finish'
             if (typeof window === 'undefined') return;
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
@@ -196,22 +192,64 @@
                         else { const r = Math.random(); if (r < 0.25) currentOp = 'add'; else if (r < 0.5) currentOp = 'sub'; else if (r < 0.75) currentOp = 'mul'; else currentOp = 'div'; }
 
                         let n1 = 0, n2 = 0, ans = 0;
-                        if (stage === 'easy') { n1 = getRandom(2, 9); n2 = getRandom(2, 9); } 
-                        else if (stage === 'medium') { n1 = getRandom(10, 20); n2 = getRandom(2, 9); } 
-                        else { n1 = getRandom(21, 50); n2 = getRandom(2, 9); }
 
-                        if (currentOp === 'add') { ans = n1 + n2; } 
-                        else if (currentOp === 'sub') { if (n1 < n2) [n1, n2] = [n2, n1]; ans = n1 - n2; } 
-                        else if (currentOp === 'mul') { if (stage === 'hard') n1 = getRandom(12, 19); if (Math.random() > 0.5) [n1, n2] = [n2, n1]; ans = n1 * n2; } 
-                        else if (currentOp === 'div') { 
-                            let qVal = 0; if (stage === 'easy') qVal = getRandom(2, 9); else if (stage === 'medium') qVal = getRandom(5, 15); else qVal = getRandom(10, 25);
-                            n2 = getRandom(2, 9); n1 = n2 * qVal; ans = qVal;
-                            if (stage === 'hard' && (n1 < 10 || n1 > 99)) continue; 
+                        // --- LOGIKA BARU UNTUK DUNGEON & BOSS RAID ---
+                        
+                        if (currentOp === 'add') {
+                            if (stage === 'easy') { n1 = getRandom(2, 20); n2 = getRandom(2, 20); }
+                            else if (stage === 'medium') { n1 = getRandom(20, 50); n2 = getRandom(10, 50); }
+                            else { n1 = getRandom(50, 100); n2 = getRandom(20, 80); } // Hard
+                            ans = n1 + n2;
+                        }
+                        else if (currentOp === 'sub') {
+                            if (stage === 'easy') { n1 = getRandom(5, 20); n2 = getRandom(2, 10); }
+                            else if (stage === 'medium') { n1 = getRandom(20, 60); n2 = getRandom(5, 30); }
+                            else { n1 = getRandom(50, 100); n2 = getRandom(10, 50); } // Hard
+                            
+                            // Mencegah hasil minus
+                            if (n1 < n2) [n1, n2] = [n2, n1];
+                            ans = n1 - n2;
+                        }
+                        else if (currentOp === 'mul') {
+                            if (stage === 'easy') { n1 = getRandom(2, 9); n2 = getRandom(2, 9); }
+                            else if (stage === 'medium') { n1 = getRandom(10, 15); n2 = getRandom(2, 9); }
+                            else {
+                                // Hard: Angka pengkali max 30
+                                n1 = getRandom(12, 30);
+                                n2 = getRandom(2, 9);
+                            }
+                            if (Math.random() > 0.5) [n1, n2] = [n2, n1];
+                            ans = n1 * n2;
+                        }
+                        else if (currentOp === 'div') {
+                            // Mencegah desimal dengan cara: n1 = n2 * ans
+                            let qVal = 0; 
+                            if (stage === 'easy') { qVal = getRandom(2, 9); n2 = getRandom(2, 5); }
+                            else if (stage === 'medium') { qVal = getRandom(2, 12); n2 = getRandom(3, 9); }
+                            else {
+                                // Hard: Pembagi (n2) max 30
+                                qVal = getRandom(5, 15);
+                                n2 = getRandom(5, 30);
+                            }
+                            n1 = n2 * qVal; 
+                            ans = qVal;
                         }
 
-                        if (ans <= 1) continue; if (currentOp === 'div' && n1 === n2) continue; 
+                        // Validasi Tambahan: Mencegah 0 atau minus (jika ada yg lolos)
+                        if (ans <= 0) continue; 
+                        if (currentOp === 'div' && n1 === n2) continue; // Mencegah jawaban 1 terus
+
                         const sig = `${n1}${currentOp}${n2}`;
-                        if (!history.has(sig)) { history.add(sig); let symbol = ''; if(currentOp==='add') symbol='+'; if(currentOp==='sub') symbol='-'; if(currentOp==='mul') symbol='x'; if(currentOp==='div') symbol=':'; q = { num1: n1, num2: n2, answer: ans, symbol }; valid = true; }
+                        if (!history.has(sig)) { 
+                            history.add(sig); 
+                            let symbol = ''; 
+                            if(currentOp==='add') symbol='+'; 
+                            if(currentOp==='sub') symbol='-'; 
+                            if(currentOp==='mul') symbol='x'; 
+                            if(currentOp==='div') symbol=':'; 
+                            q = { num1: n1, num2: n2, answer: ans, symbol }; 
+                            valid = true; 
+                        }
                     }
                     qList.push(q);
                 }
