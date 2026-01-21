@@ -41,13 +41,13 @@
         const SOUND_PATHS = {
             combo: 'assets/sounds/combo.mp3',
             brainLevelUp: 'assets/sounds/brain-level-up.mp3',
-            correct: '/assets/sounds/correct-true.mp3',     // Jawaban Benar
-            wrong: '/assets/sounds/correct-wrong.mp3',      // Jawaban Salah
-            numeric: '/assets/sounds/numeric.mp3',          // Keypad Numeric
+            correct: '/assets/sounds/correct-true.mp3',     
+            wrong: '/assets/sounds/correct-wrong.mp3',      
+            numeric: '/assets/sounds/numeric.mp3',          
             clickMenu: '/assets/sounds/click-menu.mp3'
         };
 
-        // MAPPING SUARA VOICE OVER (Permintaan Baru)
+        // MAPPING KALIMAT KE FILE SUARA (VOICE OVER)
         const VOICE_PATHS = {
             "Wah, otakmu pasti sebesar Galaksi! Kalkulator aja minder lihat kamu.": 'assets/sounds/Wah-otakmu-pasti-sebesar-Galaksi!.mp3',
             "Dikit lagi jadi Jenius! Teman-temanmu pasti gemetar kalau lihat nilaimu.": 'assets/sounds/Dikit-lagi-jadi-Jenius!.mp3',
@@ -105,14 +105,14 @@
         };
 
         const playVoiceOver = (text) => {
-            // 1. Cek apakah ada file MP3 untuk teks ini (Priority)
+            // Cek apakah ada file MP3 untuk teks ini (Priority)
             if (VOICE_PATHS[text]) {
-                const audio = new Audio(VOICE_PATHS[text]);
-                audio.play().catch((e) => console.log("Gagal memutar audio voice:", e));
+                const voice = new Audio(VOICE_PATHS[text]);
+                voice.play().catch((e) => console.log("Gagal memutar audio voice:", e));
                 return;
             }
 
-            // 2. Fallback ke Text-to-Speech Browser (Untuk mode Hacker/Pro atau jika file tidak ada)
+            // Fallback ke TTS Browser jika file tidak terdaftar
             if (typeof window !== 'undefined' && window.speechSynthesis) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
@@ -663,6 +663,42 @@
                             </div>
                             </>
                         )}
+                    </div>
+                </div>
+                );
+            }
+
+            if (appState === 'result') {
+                let title = ""; let emoji = null; let color = "";
+                const maxScore = questions.length;
+                const percentage = (score / maxScore) * 100;
+                const message = getMotivationalMessage(score, maxScore, difficulty);
+                const isHacker = difficulty === 'legend';
+
+                if (percentage === 100) { title = isHacker ? "SYSTEM HACKED!" : "HACKER LEVEL!"; emoji = <Crown size={80} className={`${isHacker ? 'text-[#00ff41]' : 'text-[#e29e00]'} animate-bounce`} />; color = isHacker ? "text-[#00ff41]" : "text-[#e29e00]"; }
+                else if (percentage >= 80) { title = "PRO PLAYER!"; emoji = <Trophy size={80} className="text-[#00b0f4] animate-pulse" />; color = "text-[#00b0f4]"; }
+                else if (percentage >= 50) { title = "NOOB BERBAKAT"; emoji = <Medal size={80} className="text-[#00b06f]" />; color = "text-[#00b06f]"; }
+                else { title = "TOTAL OOF!"; emoji = <Skull size={80} className="text-[#f44336]" />; color = "text-[#f44336]"; }
+                
+                return (
+                <div className={`min-h-screen flex flex-col items-center justify-center p-4 font-sans ${isHacker ? 'bg-[#0d1117]' : 'bg-[#111]'}`}>
+                    <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #333 0, #333 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px' }}></div>
+                    <div className={`p-8 rounded-md shadow-[0_0_50px_rgba(0,0,0,0.5)] max-w-md w-full text-center border-4 z-10 animate-fade-in relative ${isHacker ? 'bg-[#161b22] border-[#00ff41]' : 'bg-[#232527] border-[#393b3d]'}`}>
+                    <div className="flex justify-center mb-6"><div className={`p-4 rounded-full border-4 ${isHacker ? 'bg-black border-[#00ff41]' : 'bg-[#1a1c1e] border-[#393b3d]'}`}>{emoji}</div></div>
+                    <h2 className={`text-4xl font-black ${color} mb-2 uppercase drop-shadow-[0_2px_0_#000] ${isHacker ? 'font-mono' : ''}`}>{title}</h2>
+                    
+                    {/* TAMPILAN SKOR YANG DIPERBAIKI */}
+                    <div className={`rounded-md p-4 mb-6 border ${isHacker ? 'bg-black border-[#00ff41] text-[#00ff41]' : 'bg-[#1a1c1e] border-[#393b3d] text-white'}`}>
+                        <p className="font-bold uppercase text-xs mb-1 tracking-widest opacity-70">FINAL SCORE</p>
+                        <div className="text-6xl font-black">{score} <span className="text-2xl opacity-50">/ {maxScore}</span></div>
+                    </div>
+
+                    <p className={`font-bold text-lg mb-8 italic leading-relaxed border-l-4 pl-4 text-left py-2 ${isHacker ? 'text-[#00ff41] border-[#00ff41] bg-[#00ff41]/10 font-mono' : 'text-gray-300 border-[#00b0f4] bg-[#00000030]'}`}>"{message}"</p>
+                    <div className="flex gap-3">
+                        <button onClick={() => { playSFX('click-menu'); setAppState(difficulty === 'legend' ? 'hacker_menu' : (difficulty === 'pro' ? 'pro_menu' : 'rookie_menu')); }} className="flex-1 bg-[#393b3d] hover:bg-[#4b4d4f] text-white font-black py-4 rounded-md border-b-4 border-[#1a1c1e] active:border-b-0 active:translate-y-1 transition-all uppercase">GANTI MISI</button>
+                        <button onClick={() => { playSFX('click-menu'); if (selectedTable !== null) startIntro(selectedTable); else startIntro(null); }} className={`flex-1 text-white font-black py-4 rounded-md border-b-4 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 uppercase ${isHacker ? 'bg-[#00ff41] text-black border-[#00ce35] hover:bg-[#00ff41]/90' : 'bg-[#00b0f4] hover:bg-[#34c3ff] border-[#0077a6]'}`}><RefreshCcw size={20} /> Re-Spawn</button>
+                    </div>
+                    <div className="mt-4 flex justify-center"><button onClick={() => { playSFX('click-menu'); playVoiceOver(message); }} className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${isHacker ? 'text-[#00ff41]' : 'text-[#00b0f4] hover:text-white'}`}><Volume2 size={14}/> Replay Voice</button></div>
                     </div>
                 </div>
                 );
