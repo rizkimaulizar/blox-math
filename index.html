@@ -128,8 +128,9 @@
             const [comboMsg, setComboMsg] = useState('');
             const [showBrainLevelUp, setShowBrainLevelUp] = useState(false);
 
+            // LOGIKA WAKTU: Default 7 detik untuk semua soal standar
             let maxTime = 7;
-            if (difficulty === 'pro') maxTime = 5;
+            // if (difficulty === 'pro') maxTime = 5; // DIHAPUS agar tetap 7 detik
             if (operation === 'hacker_algebra') maxTime = 9; 
             if (operation === 'hacker_circle') maxTime = 13; 
             if (operation === 'hacker_balloon') maxTime = 10; 
@@ -193,7 +194,7 @@
 
                         let n1 = 0, n2 = 0, ans = 0;
 
-                        // --- LOGIKA BARU UNTUK DUNGEON & BOSS RAID ---
+                        // --- LOGIKA BARU UNTUK DUNGEON & BOSS RAID (DIUPDATE) ---
                         
                         if (currentOp === 'add') {
                             if (stage === 'easy') { n1 = getRandom(2, 20); n2 = getRandom(2, 20); }
@@ -214,11 +215,12 @@
                             if (stage === 'easy') { n1 = getRandom(2, 9); n2 = getRandom(2, 9); }
                             else if (stage === 'medium') { n1 = getRandom(10, 15); n2 = getRandom(2, 9); }
                             else {
-                                // Hard: Angka pengkali max 30
-                                n1 = getRandom(12, 30);
-                                n2 = getRandom(2, 9);
+                                // Hard: 2 digit x 1 digit (atau sebaliknya).
+                                // Syarat: Angka max 20 ke bawah.
+                                n1 = getRandom(10, 20); // 2 Digit, maks 20
+                                n2 = getRandom(2, 9);   // 1 Digit
                             }
-                            if (Math.random() > 0.5) [n1, n2] = [n2, n1];
+                            if (Math.random() > 0.5) [n1, n2] = [n2, n1]; // Acak posisi
                             ans = n1 * n2;
                         }
                         else if (currentOp === 'div') {
@@ -227,9 +229,11 @@
                             if (stage === 'easy') { qVal = getRandom(2, 9); n2 = getRandom(2, 5); }
                             else if (stage === 'medium') { qVal = getRandom(2, 12); n2 = getRandom(3, 9); }
                             else {
-                                // Hard: Pembagi (n2) max 30
-                                qVal = getRandom(5, 15);
-                                n2 = getRandom(5, 30);
+                                // Hard: Menggunakan logika invers perkalian hard.
+                                // Quotient (Jawaban) 2 digit (10-20), Pembagi 1 digit (2-9)
+                                // Sehingga n1 (Dividend) adalah hasil kali mereka.
+                                qVal = getRandom(10, 20);
+                                n2 = getRandom(2, 9);
                             }
                             n1 = n2 * qVal; 
                             ans = qVal;
