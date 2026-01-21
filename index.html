@@ -41,9 +41,9 @@
         const SOUND_PATHS = {
             combo: 'assets/sounds/combo.mp3',
             brainLevelUp: 'assets/sounds/brain-level-up.mp3',
-            correct: '/assets/sounds/correct-true.mp3',     // UPDATE: Jawaban Benar
-            wrong: '/assets/sounds/correct-wrong.mp3',      // UPDATE: Jawaban Salah
-            numeric: '/assets/sounds/numeric.mp3',          // UPDATE: Keypad Numeric
+            correct: '/assets/sounds/correct-true.mp3',     // Jawaban Benar
+            wrong: '/assets/sounds/correct-wrong.mp3',      // Jawaban Salah
+            numeric: '/assets/sounds/numeric.mp3',          // Keypad Numeric
             clickMenu: '/assets/sounds/click-menu.mp3'
         };
 
@@ -51,8 +51,8 @@
             combo: new Audio(SOUND_PATHS.combo),
             brainLevelUp: new Audio(SOUND_PATHS.brainLevelUp),
             correct: new Audio(SOUND_PATHS.correct),
-            wrong: new Audio(SOUND_PATHS.wrong),     // Object Audio Baru
-            numeric: new Audio(SOUND_PATHS.numeric), // Object Audio Baru
+            wrong: new Audio(SOUND_PATHS.wrong),     
+            numeric: new Audio(SOUND_PATHS.numeric), 
             clickMenu: new Audio(SOUND_PATHS.clickMenu)
         };
 
@@ -355,7 +355,10 @@
                 if (val === currentQ.answer) {
                     setScore(s => s + 1); setFeedback('correct'); playSFX('correct'); setTimeout(() => nextQuestion(), 1000);
                 } else {
-                    playSFX('pop'); setPoppedBalloons(prev => [...prev, index]); setFeedback('wrong'); setTimeout(() => nextQuestion(), 800); 
+                    playSFX('wrong'); // UPDATE: Menggunakan suara 'wrong' (MP3) alih-alih 'pop'
+                    setPoppedBalloons(prev => [...prev, index]); 
+                    setFeedback('wrong'); 
+                    setTimeout(() => nextQuestion(), 800); 
                 }
             };
 
