@@ -1,9 +1,9 @@
 import { state, resetState, playSFX, playVoiceOver } from './state.js';
 import * as MenuUI from './ui/menu.js';
 import * as HUD from './ui/hud.js';
-import * as Level1 from './levels/level-1.js';
-import * as Level2 from './levels/level-2.js';
-import * as Level3 from './levels/level-3.js';
+import * as Level1 from './levels/1-noob.js';
+import * as Level2 from './levels/2-pro.js';
+import * as Level3 from './levels/3-hacker.js';
 
 const root = document.getElementById('root');
 let timerInterval = null;
