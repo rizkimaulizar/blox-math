@@ -1,54 +1,40 @@
-// hint-system/noob/NoobHintPanel.js
-
-import { BlockVisualizer } from './BlockVisualizer.js';
-import { GuidedInput } from './GuidedInput.js';
+// js/ui/NoobHintPanel.js
 
 export const NoobHintPanel = {
-  container: null,
+  el: null,
 
   init() {
-    this.container = document.getElementById('noob-hint-panel');
+    if (this.el) return;
+
+    const panel = document.createElement('div');
+    panel.id = 'noob-hint-panel';
+
+    panel.style.position = 'fixed';
+    panel.style.bottom = '20px';
+    panel.style.left = '50%';
+    panel.style.transform = 'translateX(-50%)';
+    panel.style.padding = '12px 18px';
+    panel.style.background = '#0f172a'; // slate-900
+    panel.style.color = '#fff';
+    panel.style.borderRadius = '10px';
+    panel.style.fontSize = '14px';
+    panel.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
+    panel.style.opacity = '0';
+    panel.style.transition = 'opacity 0.3s ease';
+
+    document.body.appendChild(panel);
+    this.el = panel;
   },
 
-  show({ quest, attempt }) {
-    if (!this.container) this.init();
+  show(text = 'Coba hitung pelan-pelan ya 🙂') {
+    this.init();
 
-    this.container.style.display = 'block';
-
-    // 🔹 Attempt 1: visual ringan + teks singkat
-    if (attempt === 1) {
-      this.container.innerHTML = `
-        <p>👀 Coba lihat bloknya dulu ya!</p>
-      `;
-
-      BlockVisualizer.render(
-        quest.operation,
-        quest.operands
-      );
-
-      GuidedInput.setMode('normal');
-    }
-
-    // 🔹 Attempt 2+: visual kuat + input dibantu
-    if (attempt >= 2) {
-      this.container.innerHTML = `
-        <p>🧠 Kita hitung bareng-bareng 👇</p>
-      `;
-
-      BlockVisualizer.renderStepByStep(
-        quest.operation,
-        quest.operands
-      );
-
-      GuidedInput.setMode('assisted');
-    }
+    this.el.textContent = `💡 Hint: ${text}`;
+    this.el.style.opacity = '1';
   },
 
   hide() {
-    if (!this.container) return;
-
-    this.container.style.display = 'none';
-    this.container.innerHTML = '';
+    if (!this.el) return;
+    this.el.style.opacity = '0';
   }
 };
-
