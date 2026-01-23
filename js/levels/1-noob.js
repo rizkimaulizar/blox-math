@@ -1,30 +1,51 @@
+// js/levels/1-noob.js
+
+import { GameSession } from '../core/GameSession.js';
+import { GAME_LEVELS } from '../core/levelConfig.js';
+import { getHintUI } from '../hintResolver.js';
+import { renderHUD, updateProgress } from '../ui/hud.js';
 import { state } from '../state.js';
-import { renderHUD } from '../ui/hud.js';
 
-export function start(container, onComplete) {
-    // Generate Questions
-    const count = 10;
-    state.questions = [];
-    let uniqueModifiers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    // Shuffle
-    for (let i = uniqueModifiers.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [uniqueModifiers[i], uniqueModifiers[j]] = [uniqueModifiers[j], uniqueModifiers[i]]; }
+export function startNoobLevel() {
+  // 1️⃣ Load Level Configuration
+  const levelConfig = GAME_LEVELS.NOOB;
 
-    const table = state.currentLevel; // The selected number (1-10)
-    const op = state.operation;
+  // 2️⃣ Init Game Session (Gameplay Loop)
+  const session = new GameSession('NOOB');
 
-    for (let i = 0; i < count; i++) {
-        let n1 = 0, n2 = 0, ans = 0, symbol = '';
-        const mod = i < uniqueModifiers.length ? uniqueModifiers[i] : Math.floor(Math.random() * 10) + 1;
-        
-        if (op === 'mul') { n1 = table; n2 = mod; ans = n1 * n2; symbol = 'x'; } 
-        else if (op === 'div') { n2 = table; ans = mod; n1 = n2 * ans; symbol = ':'; }
-        else if (op === 'add') { n1 = table; n2 = mod; ans = n1 + n2; symbol = '+'; }
-        else if (op === 'sub') { n2 = table; ans = mod; n1 = ans + n2; symbol = '-'; }
-        
-        state.questions.push({ num1: n1, num2: n2, answer: ans, symbol });
-    }
+  // 3️⃣ Resolve Hint UI (NOOB ONLY)
+  const HintUI = getHintUI('NOOB');
 
-    // Since Level 1 & 2 share mechanics, we rely on App.js loop, 
-    // but ensuring state is prepped.
-    // The render is handled by App.js using renderHUD
+  // 4️⃣ Sync initial state
+  state.currentLevel = 'NOOB';
+  state.progress = 0;
+
+  // 5️⃣ Register Session Callbacks (EVENT CONTRACT)
+  session.onQuestionStart = (quest, index) => {
+    renderHUD({
+      narrative: quest.narrative,
+      index,
+      total: session.totalQuestions
+    });
+  };
+
+  session.onWrong = (quest, attempt) => {
+    HintUI.show({
+      quest,
+      attempt
+    });
+  };
+
+  session.onCorrect = (quest) => {
+    HintUI.hide();
+    updateProgress(++state.progress);
+  };
+
+  session.onFinish = (summary) => {
+    console.log('NOOB LEVEL COMPLETE', summary);
+    // nanti: show completion UI / unlock PRO
+  };
+
+  // 6️⃣ Start Session
+  session.start();
 }
