@@ -105,3 +105,11 @@ export function renderResult(message) {
         </div>
     </div>`;
 }
+
+// 🔹 Adapter for new GameSession system
+export function updateProgress(currentIndex, total) {
+  const stageEl = document.querySelector('[data-hud-stage]');
+  if (stageEl) {
+    stageEl.textContent = `Stage ${currentIndex + 1}/${total}`;
+  }
+}
