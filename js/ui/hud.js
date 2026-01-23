@@ -13,18 +13,22 @@ export function renderHUD(feedback, userAnswer, maxTime) {
     const borderClass = feedback === 'correct' ? 'border-[#00ff41] animate-pulse' : (feedback === 'wrong' || feedback === 'timeout' ? 'border-[#f44336] animate-pulse' : 'border-[#30363d]');
 
     // Combo HTML
+    // UPDATE: Posisi diubah menjadi relative terhadap container game (-top-14 -right-2)
     let comboHtml = '';
     if (state.difficulty === 'rookie' && state.combo > 1) {
         let comboMsg = "";
         if (state.combo === 3) comboMsg = "Keren!";
         else if (state.combo === 5) comboMsg = "Hebat!";
         else if (state.combo >= 8) comboMsg = "Otak Kamu Panas 🔥";
-        comboHtml = `<div class="absolute top-20 right-4 animate-bounce z-50"><div class="bg-orange-500 text-white px-4 py-2 rounded-full font-black border-4 border-yellow-400 shadow-lg rotate-12 flex flex-col items-center"><div class="flex items-center gap-1"><i data-lucide="flame" fill="yellow" class="text-yellow-200" width="20"></i><span>COMBO x${state.combo}</span></div>${comboMsg ? `<div class="text-[10px] text-yellow-100 uppercase tracking-wider">${comboMsg}</div>` : ''}</div></div>`;
+        
+        comboHtml = `
+        <div class="absolute -top-14 -right-2 animate-bounce z-50 pointer-events-none origin-bottom-left">
+            <div class="bg-orange-500 text-white px-4 py-2 rounded-full font-black border-4 border-yellow-400 shadow-lg rotate-12 flex flex-col items-center scale-90 sm:scale-100">
+                <div class="flex items-center gap-1"><i data-lucide="flame" fill="yellow" class="text-yellow-200" width="20"></i><span>COMBO x${state.combo}</span></div>
+                ${comboMsg ? `<div class="text-[10px] text-yellow-100 uppercase tracking-wider">${comboMsg}</div>` : ''}
+            </div>
+        </div>`;
     }
-
-    // Brain Level Up
-    let brainHtml = '';
-    // (Managed via app.js state overlay ideally, but handled here for simplicity if needed, skipping for now to keep string clean)
 
     // Keypad Logic
     let keypadHtml = '';
@@ -60,8 +64,9 @@ export function renderHUD(feedback, userAnswer, maxTime) {
             <div class="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-md border-b-4 border-black/20"><i data-lucide="star" fill="${isHacker ? "#00ff41" : "#e29e00"}" class="${isHacker ? "text-[#00ff41]" : "text-[#e29e00]"}"></i> ${state.score}</div>
             <div class="bg-black/40 px-4 py-2 rounded-md border-b-4 border-black/20 uppercase text-sm">Stage ${state.currentIndex + 1}/${totalQ}</div>
         </div>
-        ${comboHtml}
+        
         <div id="game-container" class="p-6 rounded-md shadow-2xl max-w-md w-full text-center border-b-8 relative ${isHacker ? `bg-[#161b22] ${borderClass} shadow-[0_0_30px_rgba(0,255,65,0.1)]` : 'bg-[#393b3d] border-[#1a1c1e]'}">
+            ${comboHtml} 
             ${feedbackOverlay}
             <div class="h-6 bg-[#1a1c1e] w-full rounded-sm mb-6 p-1"><div class="h-full rounded-sm transition-all duration-100 ease-linear ${progressPercent < 30 ? 'bg-[#f44336]' : (isHacker ? 'bg-[#00ff41]' : 'bg-[#00b0f4]')}" style="width: ${progressPercent}%"></div></div>
             <div id="dynamic-area" class="mb-4">
