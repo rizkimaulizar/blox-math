@@ -125,15 +125,6 @@ else if (state.difficulty === 'legend') {
   Level3.start();
 }
 
-    state.appState = 'playing';
-    state.timeLeft = maxTimeCurrent;
-    currentFeedback = null;
-    userAnswerBuffer = "";
-    poppedBalloons = [];
-    ringMidRot = Math.floor(Math.random() * 10);
-    ringOutRot = Math.floor(Math.random() * 10);
-    render();
-
     timerInterval = setInterval(() => {
         if (state.timeLeft <= 0.1) {
             handleAnswerResult(false, true); // Timeout
