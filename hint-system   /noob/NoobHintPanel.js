@@ -1,40 +1,35 @@
-// js/ui/NoobHintPanel.js
+// hint-system/noob/NoobHintPanel.js
 
 export const NoobHintPanel = {
-  el: null,
+  show(quest, attempt) {
+    let panel = document.getElementById('hint-panel');
 
-  init() {
-    if (this.el) return;
+    // Create panel if not exists
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'hint-panel';
+      panel.style.padding = '12px';
+      panel.style.marginTop = '12px';
+      panel.style.background = '#1f2937';
+      panel.style.color = '#fff';
+      panel.style.borderRadius = '8px';
 
-    const panel = document.createElement('div');
-    panel.id = 'noob-hint-panel';
+      document.body.appendChild(panel);
+    }
 
-    panel.style.position = 'fixed';
-    panel.style.bottom = '20px';
-    panel.style.left = '50%';
-    panel.style.transform = 'translateX(-50%)';
-    panel.style.padding = '12px 18px';
-    panel.style.background = '#0f172a'; // slate-900
-    panel.style.color = '#fff';
-    panel.style.borderRadius = '10px';
-    panel.style.fontSize = '14px';
-    panel.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
-    panel.style.opacity = '0';
-    panel.style.transition = 'opacity 0.3s ease';
-
-    document.body.appendChild(panel);
-    this.el = panel;
-  },
-
-  show(text = 'Coba hitung pelan-pelan ya 🙂') {
-    this.init();
-
-    this.el.textContent = `💡 Hint: ${text}`;
-    this.el.style.opacity = '1';
+    panel.innerHTML = `
+      <div style="font-weight:bold; margin-bottom:6px;">
+        💡 Hint ${attempt}
+      </div>
+      <div>
+        Coba hitung pelan-pelan ya 👀  
+        (${quest.operands.join(' ' + quest.operation + ' ')})
+      </div>
+    `;
   },
 
   hide() {
-    if (!this.el) return;
-    this.el.style.opacity = '0';
+    const panel = document.getElementById('hint-panel');
+    if (panel) panel.remove();
   }
 };
