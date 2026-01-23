@@ -1,18 +1,12 @@
-import { NoobHintPanel } from './NoobHintPanel.js';
-import { ProHintPanel } from './ProHintPanel.js';
+// js/ui/hintSystem.js
 
-export const HintSystem = {
-  show(level, text) {
-    if (level === 'NOOB') {
-      NoobHintPanel.show(text);
-    } else {
-      ProHintPanel.show();
-    }
-  },
+import { NoobHintPanel } from '../../hint-system/noob/NoobHintPanel.js';
+import { ProHintPanel } from '../../hint-system/pro/ProHintPanel.js';
 
-  hide(level) {
-    if (level === 'NOOB') {
-      NoobHintPanel.hide();
-    }
+export function showHint(levelKey, quest, attempt) {
+  if (levelKey === 'NOOB') {
+    NoobHintPanel.show(quest, attempt);
+  } else if (levelKey === 'PRO') {
+    ProHintPanel.show(quest, attempt);
   }
-};
+}
