@@ -2,7 +2,7 @@
 
 import { GAME_LEVELS } from './levelConfig.js';
 import { BloxQuestGenerator } from './questionGenerator.js';
-import { HintSystem } from './hintSystem.js';
+import { showHint } from '../ui/hintSystem.js';
 
 export class GameSession {
   constructor(levelKey = 'NOOB') {
