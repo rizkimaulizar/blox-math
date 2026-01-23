@@ -1,7 +1,5 @@
-// js/ui/hintSystem.js
-
-import { NoobHintPanel } from '../../hint-system/noob/NoobHintPanel.js';
-import { ProHintPanel } from '../../hint-system/pro/ProHintPanel.js';
+import { NoobHintPanel } from './NoobHintPanel.js';
+import { ProHintPanel } from './ProHintPanel.js';
 
 export function showHint(levelKey, quest, attempt) {
   if (levelKey === 'NOOB') {
