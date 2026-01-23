@@ -106,7 +106,17 @@ function startGame() {
     
     // Level Selection Logic
     if (state.difficulty === 'rookie') {
-  import('./levels/1-noob.js');
+  import('./levels/1-noob.js').then(() => {
+    state.appState = 'playing';
+    state.timeLeft = maxTimeCurrent;
+    currentFeedback = null;
+    userAnswerBuffer = "";
+    poppedBalloons = [];
+    ringMidRot = Math.floor(Math.random() * 10);
+    ringOutRot = Math.floor(Math.random() * 10);
+    render();
+  });
+  return; // ⬅️ PENTING
 }
 else if (state.difficulty === 'pro') {
   Level2.start();
