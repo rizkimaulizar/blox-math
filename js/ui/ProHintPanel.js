@@ -1,7 +1,7 @@
+// js/ui/ProHintPanel.js
 export const ProHintPanel = {
   show() {
-    // PRO belum pakai hint
-    console.log('[PRO HINT] disabled');
-  }
+    console.warn('PRO hint not ready');
+  },
+  hide() {}
 };
-
