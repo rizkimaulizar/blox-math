@@ -13,7 +13,8 @@ export function renderHUD(feedback, userAnswer, maxTime) {
     const borderClass = feedback === 'correct' ? 'border-[#00ff41] animate-pulse' : (feedback === 'wrong' || feedback === 'timeout' ? 'border-[#f44336] animate-pulse' : 'border-[#30363d]');
 
     // Combo HTML
-    // UPDATE: Posisi diubah menjadi relative terhadap container game (-top-14 -right-2)
+    // PERBAIKAN: Posisi diubah ke '-top-4' (tidak terlalu tinggi) dan '-right-2' (menempel di pojok).
+    // Ini memanfaatkan celah margin antara kotak soal dan header Stage.
     let comboHtml = '';
     if (state.difficulty === 'rookie' && state.combo > 1) {
         let comboMsg = "";
@@ -22,10 +23,10 @@ export function renderHUD(feedback, userAnswer, maxTime) {
         else if (state.combo >= 8) comboMsg = "Otak Kamu Panas 🔥";
         
         comboHtml = `
-        <div class="absolute -top-14 -right-2 animate-bounce z-50 pointer-events-none origin-bottom-left">
-            <div class="bg-orange-500 text-white px-4 py-2 rounded-full font-black border-4 border-yellow-400 shadow-lg rotate-12 flex flex-col items-center scale-90 sm:scale-100">
-                <div class="flex items-center gap-1"><i data-lucide="flame" fill="yellow" class="text-yellow-200" width="20"></i><span>COMBO x${state.combo}</span></div>
-                ${comboMsg ? `<div class="text-[10px] text-yellow-100 uppercase tracking-wider">${comboMsg}</div>` : ''}
+        <div class="absolute -top-4 -right-2 animate-bounce z-50 pointer-events-none origin-bottom-left">
+            <div class="bg-orange-500 text-white px-3 py-1 rounded-full font-black border-4 border-yellow-400 shadow-lg rotate-12 flex flex-col items-center scale-90">
+                <div class="flex items-center gap-1"><i data-lucide="flame" fill="yellow" class="text-yellow-200" width="16"></i><span class="text-sm">COMBO x${state.combo}</span></div>
+                ${comboMsg ? `<div class="text-[9px] text-yellow-100 uppercase tracking-wider leading-none pb-1">${comboMsg}</div>` : ''}
             </div>
         </div>`;
     }
