@@ -63,11 +63,14 @@ export class GameSession {
   }
 
   handleWrong() {
-    this.attempt++;
+  this.attempt++;
 
-    // 🔔 EVENT: Wrong Answer
-    this.onWrong(this.currentQuest, this.attempt);
-  }
+  // 🔔 EVENT: Wrong Answer
+  this.onWrong(this.currentQuest, this.attempt);
+
+  // 🧠 NOOB HINT (SAFE)
+  showHint(this.config.key, this.currentQuest.hint);
+}
 
   finishSession() {
     const summary = {
