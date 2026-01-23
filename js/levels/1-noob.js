@@ -38,3 +38,14 @@ session.onFinish = (summary) => {
 };
 
 session.start();
+
+// === TEMP INPUT BRIDGE (NOOB ONLY) ===
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-value]');
+  if (!btn) return;
+
+  const value = Number(btn.dataset.value);
+  if (isNaN(value)) return;
+
+  session.submitAnswer(value);
+});
