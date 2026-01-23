@@ -1,6 +1,6 @@
 // js/hintResolver.js
-import { NoobHintPanel } from '../hint-system/noob/NoobHintPanel.js';
-import { ProHintPanel } from '../hint-system/pro/ProHintPanel.js';
+import { NoobHintPanel } from '../js/ui/NoobHintPanel.js';
+import { ProHintPanel } from '../js/ui/ProHintPanel.js';
 
 export function getHintUI(levelKey) {
   if (levelKey === 'NOOB') {
