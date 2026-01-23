@@ -1,51 +1,29 @@
-// js/levels/1-noob.js
-
 import { GameSession } from '../core/GameSession.js';
-import { GAME_LEVELS } from '../core/levelConfig.js';
-import { getHintUI } from '../hintResolver.js';
 import { renderHUD, updateProgress } from '../ui/hud.js';
-import { state } from '../state.js';
+import { NoobHintPanel } from '../ui/NoobHintPanel.js';
 
-export function startNoobLevel() {
-  // 1️⃣ Load Level Configuration
-  const levelConfig = GAME_LEVELS.NOOB;
+const session = new GameSession('NOOB');
 
-  // 2️⃣ Init Game Session (Gameplay Loop)
-  const session = new GameSession('NOOB');
+// 1️⃣ Saat soal dimulai
+session.onQuestionStart = (quest, index) => {
+  renderQuestion(quest);
+  updateProgress(index, session.totalQuestions);
+};
 
-  // 3️⃣ Resolve Hint UI (NOOB ONLY)
-  const HintUI = getHintUI('NOOB');
+// 2️⃣ Saat jawaban salah
+session.onWrong = (quest, attempt) => {
+  NoobHintPanel.show(quest, attempt);
+};
 
-  // 4️⃣ Sync initial state
-  state.currentLevel = 'NOOB';
-  state.progress = 0;
+// 3️⃣ Saat jawaban benar
+session.onCorrect = () => {
+  NoobHintPanel.hide();
+};
 
-  // 5️⃣ Register Session Callbacks (EVENT CONTRACT)
-  session.onQuestionStart = (quest, index) => {
-    renderHUD({
-      narrative: quest.narrative,
-      index,
-      total: session.totalQuestions
-    });
-  };
+// 4️⃣ Saat sesi selesai
+session.onFinish = (summary) => {
+  alert(`Selesai! Total blocks: ${summary.totalBlocks}`);
+};
 
-  session.onWrong = (quest, attempt) => {
-    HintUI.show({
-      quest,
-      attempt
-    });
-  };
-
-  session.onCorrect = (quest) => {
-    HintUI.hide();
-    updateProgress(++state.progress);
-  };
-
-  session.onFinish = (summary) => {
-    console.log('NOOB LEVEL COMPLETE', summary);
-    // nanti: show completion UI / unlock PRO
-  };
-
-  // 6️⃣ Start Session
-  session.start();
-}
+// 🚀 START GAME
+session.start();
