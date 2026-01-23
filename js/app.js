@@ -105,9 +105,15 @@ function startGame() {
     resetState();
     
     // Level Selection Logic
-    if (state.difficulty === 'rookie') Level1.start();
-    else if (state.difficulty === 'pro') Level2.start();
-    else if (state.difficulty === 'legend') Level3.start();
+    if (state.difficulty === 'rookie') {
+  import('./levels/1-noob.js');
+}
+else if (state.difficulty === 'pro') {
+  Level2.start();
+}
+else if (state.difficulty === 'legend') {
+  Level3.start();
+}
 
     state.appState = 'playing';
     state.timeLeft = maxTimeCurrent;
