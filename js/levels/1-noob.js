@@ -1,55 +1,60 @@
+// js/levels/1-noob.js
+
 import { GameSession } from '../core/GameSession.js';
+import { updateProgress, updateScore } from '../ui/hud.js';
 import { NoobHintPanel } from '../ui/NoobHintPanel.js';
-import { state } from '../state.js';
 
 let session = null;
 
+/**
+ * RENDER SOAL KE LAYAR
+ */
+function renderQuestion(quest) {
+  const area = document.getElementById('dynamic-area');
+  if (!area || !quest) return;
+
+  const [a, b] = quest.operands;
+
+  area.innerHTML = `
+    <div class="flex justify-center items-center gap-4 text-6xl font-black">
+      <span>${a}</span>
+      <span class="text-[#00b0f4]">+</span>
+      <span>${b}</span>
+    </div>
+  `;
+}
+
+/**
+ * START LEVEL NOOB
+ */
 export function start() {
   session = new GameSession('NOOB');
 
-  // RESET STATE
-  state.questions = [];
-  state.currentIndex = 0;
-  state.score = 0;
-  state.combo = 0;
-  state.appState = 'playing';
-
-  session.onQuestionStart = () => {
-    const quest = session.currentQuestion; // ⬅️ PENTING
-
-    if (!quest) return;
-
-    const index = session.currentIndex;
-
-    state.questions[index] = {
-      num1: quest.operands[0],
-      num2: quest.operands[1],
-      symbol: quest.operation === 'ADD' ? '+' : '×',
-      answer: quest.answer
-    };
-
-    state.currentIndex = index;
-  };
-
-  session.onWrong = (quest, attempt) => {
-    state.combo = 0;
-    NoobHintPanel.show(quest, attempt);
+  session.onQuestionStart = (quest, index) => {
+    renderQuestion(quest);
+    updateProgress(index, session.totalQuestions);
   };
 
   session.onCorrect = () => {
-    state.score++;
-    state.combo++;
     NoobHintPanel.hide();
+    updateScore(session.blocksCollected);
+  };
+
+  session.onWrong = (quest, attempt) => {
+    NoobHintPanel.show(quest, attempt);
   };
 
   session.onFinish = () => {
-    state.appState = 'result';
+    alert('🎉 Selesai!');
   };
 
   session.start();
 }
 
+/**
+ * INPUT DARI HUD (ANGKA)
+ */
 export function submit(value) {
   if (!session) return;
-  session.submitAnswer(value);
+  session.submitAnswer(Number(value));
 }
