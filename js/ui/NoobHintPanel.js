@@ -7,18 +7,32 @@ export const NoobHintPanel = {
     if (!panel) {
       panel = document.createElement('div');
       panel.id = 'hint-panel';
-      panel.style.padding = '12px';
-      panel.style.background = '#1f2937';
-      panel.style.color = '#fff';
-      panel.style.borderRadius = '8px';
-      panel.style.marginTop = '12px';
+      panel.className = `
+        mt-4 p-3 rounded-md text-sm font-bold text-center
+        bg-[#111827] text-white border-2 border-[#00b0f4]
+        animate-pulse
+      `;
 
-      document.body.appendChild(panel);
+      const container = document.getElementById('game-container') 
+        || document.body;
+
+      container.appendChild(panel);
+    }
+
+    const [a, b] = quest.operands || [0, 0];
+    let hintText = 'Coba hitung pelan-pelan ya 🙂';
+
+    if (quest.operation === 'ADD') {
+      hintText = `Hitung ${a} lalu tambah ${b}`;
+    }
+
+    if (quest.operation === 'MULTIPLY') {
+      hintText = `${a} kelompok, masing-masing ${b}`;
     }
 
     panel.innerHTML = `
-      <strong>💡 Hint ${attempt}</strong><br/>
-      Hitung pelan-pelan ya 👀
+      💡 Hint ${attempt}<br/>
+      <span class="opacity-80">${hintText}</span>
     `;
   },
 
