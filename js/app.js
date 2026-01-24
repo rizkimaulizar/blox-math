@@ -107,38 +107,27 @@ function startGame() {
   // === START LEVEL SESSION ===
   if (state.difficulty === 'rookie') {
     Level1.start();
-  } 
-  else if (state.difficulty === 'pro') {
+  } else if (state.difficulty === 'pro') {
     Level2.start();
-  } 
-  else if (state.difficulty === 'legend') {
+  } else if (state.difficulty === 'legend') {
     Level3.start();
   }
 
   // === GLOBAL GAME STATE ===
   state.appState = 'playing';
   state.timeLeft = maxTimeCurrent;
-  currentFeedback = null;
-  userAnswerBuffer = "";
-  poppedBalloons = [];
-  ringMidRot = Math.floor(Math.random() * 10);
-  ringOutRot = Math.floor(Math.random() * 10);
 
   render();
 
-  // === TIMER LOOP (GLOBAL) ===
   timerInterval = setInterval(() => {
     if (state.timeLeft <= 0.1) {
       handleAnswerResult(false, true);
     } else {
       state.timeLeft -= 0.1;
-      const bar = document.querySelector('.transition-all.duration-100');
-      if (bar) {
-        bar.style.width = `${(state.timeLeft / maxTimeCurrent) * 100}%`;
-      }
     }
   }, 100);
 }
+
 else if (state.difficulty === 'pro') {
   Level2.start();
 }
