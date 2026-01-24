@@ -7,17 +7,32 @@ let session = null;
 export function start() {
   session = new GameSession('NOOB');
 
-  session.onQuestionStart = (quest) => {
-    // Sinkronkan ke STATE, bukan render
-    state.questions = session.questions;
-    state.currentIndex = session.currentIndex;
+  // RESET STATE KHUSUS NOOB
+  state.questions = [];
+  state.currentIndex = 0;
+  state.score = 0;
+  state.combo = 0;
+  state.appState = 'playing';
+
+  session.onQuestionStart = (quest, index) => {
+    // Sinkronkan quest ke STATE
+    state.questions[index] = {
+      num1: quest.operands[0],
+      num2: quest.operands[1],
+      symbol: quest.operation === 'ADD' ? '+' : '×',
+      answer: quest.answer
+    };
+    state.currentIndex = index;
   };
 
   session.onWrong = (quest, attempt) => {
+    state.combo = 0;
     NoobHintPanel.show(quest, attempt);
   };
 
   session.onCorrect = () => {
+    state.score++;
+    state.combo++;
     NoobHintPanel.hide();
   };
 
