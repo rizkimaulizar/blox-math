@@ -121,30 +121,17 @@ function startGame() {
 
   timerInterval = setInterval(() => {
     if (state.timeLeft <= 0.1) {
-      handleAnswerResult(false, true);
+      handleAnswerResult(false, true); // timeout
     } else {
       state.timeLeft -= 0.1;
+
+      // update progress bar saja (lebih ringan)
+      const bar = document.querySelector('.transition-all.duration-100');
+      if (bar) {
+        bar.style.width = `${(state.timeLeft / maxTimeCurrent) * 100}%`;
+      }
     }
   }, 100);
-}
-
-else if (state.difficulty === 'pro') {
-  Level2.start();
-}
-else if (state.difficulty === 'legend') {
-  Level3.start();
-}
-
-    timerInterval = setInterval(() => {
-        if (state.timeLeft <= 0.1) {
-            handleAnswerResult(false, true); // Timeout
-        } else {
-            state.timeLeft -= 0.1;
-            // Update only progress bar for performance if possible, but render() is simple enough
-            const bar = document.querySelector('.transition-all.duration-100');
-            if(bar) bar.style.width = `${(state.timeLeft / maxTimeCurrent) * 100}%`;
-        }
-    }, 100);
 }
 
 function nextQuestion() {
