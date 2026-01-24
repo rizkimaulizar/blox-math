@@ -222,11 +222,14 @@ document.addEventListener('click', (e) => {
     }
     if (btn.dataset.action === 'submit') {
         if (!currentFeedback && userAnswerBuffer !== '') {
-            const q = state.questions[state.currentIndex];
-            handleAnswerResult(parseInt(userAnswerBuffer) === q.answer);
-        }
-    }
-
+            if (state.difficulty === 'rookie') {
+              Level1.submit(Number(userAnswerBuffer));
+            } else {
+              const q = state.questions[state.currentIndex];
+              handleAnswerResult(parseInt(userAnswerBuffer) === q.answer);
+            }
+         }
+     }
     // Hacker Controls
     if (btn.dataset.balloon) {
         if (currentFeedback) return;
