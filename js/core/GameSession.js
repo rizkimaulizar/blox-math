@@ -1,5 +1,3 @@
-// js/core/GameSession.js
-
 import { GAME_LEVELS } from './levelConfig.js';
 import { BloxQuestGenerator } from './questionGenerator.js';
 import { showHint } from '../ui/hintSystem.js';
@@ -9,13 +7,17 @@ export class GameSession {
     this.config = GAME_LEVELS[levelKey];
     this.generator = new BloxQuestGenerator(this.config);
 
-    this.currentQuestionIndex = 0;
+    this.currentIndex = 0;
     this.totalQuestions = 10;
     this.attempt = 0;
     this.blocksCollected = 0;
+
     this.currentQuest = null;
 
-    // 🔔 Event Callbacks (Safe Defaults)
+    // 🔹 DIPAKAI HUD / APP
+    this.questions = [];
+
+    // 🔔 Event hooks
     this.onQuestionStart = () => {};
     this.onWrong = () => {};
     this.onCorrect = () => {};
@@ -23,26 +25,42 @@ export class GameSession {
   }
 
   start() {
-    this.currentQuestionIndex = 0;
+    this.currentIndex = 0;
     this.blocksCollected = 0;
+    this.questions = [];
     this.nextQuestion();
   }
 
   nextQuestion() {
-    if (this.currentQuestionIndex >= this.totalQuestions) {
+    if (this.currentIndex >= this.totalQuestions) {
       this.finishSession();
       return;
     }
 
     this.attempt = 0;
-    this.currentQuest = this.generator.generateQuest(this.currentQuestionIndex);
 
-    // 🔔 EVENT: Question Start
-    this.onQuestionStart(this.currentQuest, this.currentQuestionIndex);
+    const q = this.generator.generateQuest(this.currentIndex);
+
+    // 🔹 NORMALISASI FORMAT (WAJIB UNTUK HUD)
+    const quest = {
+      num1: q.operands?.[0] ?? q.a ?? 0,
+      num2: q.operands?.[1] ?? q.b ?? 0,
+      symbol: q.operation === 'ADD' ? '+' : '×',
+      answer: q.answer,
+      hint: q.hint || ''
+    };
+
+    this.currentQuest = quest;
+    this.questions[this.currentIndex] = quest;
+
+    // 🔔 EVENT
+    this.onQuestionStart(quest, this.currentIndex);
   }
 
   submitAnswer(playerInput) {
-    if (playerInput === this.currentQuest.answer) {
+    if (!this.currentQuest) return;
+
+    if (Number(playerInput) === this.currentQuest.answer) {
       this.handleCorrect();
     } else {
       this.handleWrong();
@@ -50,36 +68,27 @@ export class GameSession {
   }
 
   handleCorrect() {
-    const reward =
-      this.currentQuest.phase === 'FINISHER' ? 50 : 10;
+    this.blocksCollected += 10;
 
-    this.blocksCollected += reward;
-
-    // 🔔 EVENT: Correct Answer
     this.onCorrect(this.currentQuest);
 
-    this.currentQuestionIndex++;
+    this.currentIndex++;
     this.nextQuestion();
   }
 
   handleWrong() {
-  this.attempt++;
+    this.attempt++;
 
-  // 🔔 EVENT: Wrong Answer
-  this.onWrong(this.currentQuest, this.attempt);
+    this.onWrong(this.currentQuest, this.attempt);
 
-  // 🧠 NOOB HINT (SAFE)
-  showHint(this.config.key, this.currentQuest.hint);
-}
+    // 🧠 NOOB = SELALU AMAN
+    showHint(this.config.key, this.currentQuest.hint);
+  }
 
   finishSession() {
-    const summary = {
+    this.onFinish({
       totalBlocks: this.blocksCollected,
       totalQuestions: this.totalQuestions
-    };
-
-    // 🔔 EVENT: Session Finish
-    this.onFinish(summary);
+    });
   }
 }
-
